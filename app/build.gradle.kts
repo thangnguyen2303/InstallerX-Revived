@@ -64,7 +64,7 @@ android {
         // Please change the applicationId to one that does not conflict with any official release.
         applicationId = project.findProperty("APP_ID") as String?
             ?: "com.rosan.installer.x.revived"
-        namespace = "com.rosan.installer"
+        namespace = "com.miui.packageinstaller"
         minSdk = 26
         targetSdk = 37
         // Version control:
