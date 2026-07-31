@@ -74,7 +74,8 @@ android {
                 signingConfigs.getByName("releaseCustom")
             } else {
                 println("No custom signing info. Release build will use the default debug keystore.")
-                signingConfigs.getByName("debug")
+                //signingConfigs.getByName("debug")
+                null
             }
             vcsInfo.include = false
             optimization.enable = true
