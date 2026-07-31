@@ -1,39 +1,90 @@
-name: Build Unsigned InstallerX
+name: Build Custom Unsigned Release
 
-# Sự kiện workflow_dispatch cho phép tạo form nhập liệu thủ công trên GitHub
 on:
   workflow_dispatch:
     inputs:
+      version_tag:
+        description: 'Nhập Version tag (ví dụ: 26.03.01)'
+        required: true
+        default: '1.0'
       app_id:
-        description: 'Nhập Package Name (Application ID)'
+        description: 'Nhập Package Name (ví dụ: com.hypertn.installer)'
         required: true
         default: 'com.hypertn.installer'
 
 jobs:
-  build:
+  build_and_release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
 
     steps:
-    - name: Checkout mã nguồn
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
-    - name: Thiết lập Java JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
 
-    - name: Cấp quyền thực thi cho gradlew
-      run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-publish: false
+          cache-read-only: true
 
-    - name: Build ứng dụng (Unsigned Release)
-      # Lệnh build sẽ kết hợp Flavor (Online + Stable) và Build Type (Release)
-      # Tham số -PAPP_ID lấy trực tiếp dữ liệu bạn nhập từ giao diện GitHub
-      run: ./gradlew assembleOnlineStableRelease -PAPP_ID="${{ github.event.inputs.app_id }}"
+      # ĐÃ XÓA: Các bước Verify Keystore và Setup Signing Keys của tác giả
 
-    - name: Đóng gói và lưu file APK
-      uses: actions/upload-artifact@v4
-      with:
-        # Tên file tải về sẽ đính kèm luôn package name để bạn dễ phân biệt
-        name: InstallerX-Unsigned-${{ github.event.inputs.app_id }}
-        path: app/build/outputs/apk/**/*.apk
+      - name: Cấp quyền thực thi cho gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Unsigned Stable Release APKs
+        env:
+          # Thêm Token để sửa lỗi 401 Unauthorized khi tải thư viện miuix
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Truyền thêm tham số -PAPP_ID lấy từ giao diện nhập liệu
+        run: ./gradlew assembleOnlineStableRelease assembleOfflineStableRelease -PVERSION_NAME="${{ inputs.version_tag }}" -PAPP_ID="${{ inputs.app_id }}"
+
+      - name: Find and Rename Unsigned APKs
+        id: rename_apk
+        run: |
+          PROJECT_NAME="InstallerX"
+          VERSION_TAG="${{ inputs.version_tag }}"
+          APP_ID="${{ inputs.app_id }}"
+          
+          for FLAVOR in online offline; do
+            APK_DIR="app/build/outputs/apk/${FLAVOR}Stable/release/"
+            ORIGINAL_APK=$(find "$APK_DIR" -maxdepth 1 -type f -name "*.apk" | head -n 1)
+
+            if [ -z "$ORIGINAL_APK" ]; then
+              echo "ERROR: APK not found in $APK_DIR!"
+              exit 1
+            fi
+
+            # Đổi tên file APK thêm chữ unsigned và package name để dễ nhận biết
+            NEW_APK_NAME="${PROJECT_NAME}-${FLAVOR}-${APP_ID}-unsigned.apk"
+            NEW_APK_PATH="${APK_DIR}${NEW_APK_NAME}"
+
+            echo "Renaming $ORIGINAL_APK -> $NEW_APK_PATH"
+            mv "$ORIGINAL_APK" "$NEW_APK_PATH"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: "Bản mod InstallerX - ${{ inputs.app_id }}"
+          # Tạo tag mới không trùng với tag gốc của tác giả
+          tag_name: mod-${{ inputs.version_tag }}-${{ github.run_number }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          files: |
+            app/build/outputs/apk/onlineStable/release/*.apk
+            app/build/outputs/apk/offlineStable/release/*.apk
