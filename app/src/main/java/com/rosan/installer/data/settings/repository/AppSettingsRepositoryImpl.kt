@@ -90,7 +90,7 @@ class AppSettingsRepositoryImpl(
                 value = prefs[AppDataStore.SMART_AUTHORIZER_CANDIDATES].orEmpty(),
                 isSystemApp = capabilityProvider.isSystemApp
             ),
-            showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: false,
+            showMiuixUI = prefs[AppDataStore.UI_USE_MIUIX] ?: true,
             preferSystemIcon = prefs[AppDataStore.PREFER_SYSTEM_ICON_FOR_INSTALL] ?: false,
             showLauncherIcon = prefs[AppDataStore.SHOW_LAUNCHER_ICON] ?: true,
             userSetLSPosedActive = prefs[AppDataStore.USER_SET_LSPOSED_ACTIVE] ?: false,
