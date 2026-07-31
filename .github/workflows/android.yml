@@ -10,7 +10,7 @@ on:
       app_id:
         description: 'Nhập Package Name (ví dụ: com.hypertn.installer)'
         required: true
-        default: 'com.hypertn.installer'
+        default: 'com.miui.packageinstaller'
 
 jobs:
   build_and_release:
