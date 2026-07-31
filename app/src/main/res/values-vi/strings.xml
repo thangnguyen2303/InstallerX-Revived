@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Trình cài đặt gói</string>
     <string name="warning">Cảnh báo</string>
     <string name="open_source_license">Giấy phép Nguồn Mở</string>
     <string name="open_source_license_settings_description">Xem các thư viện nguồn mở của bên thứ ba và giấy phép của chúng</string>
