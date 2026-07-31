@@ -267,7 +267,7 @@ class InstallerService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannelCompat.Builder(
             CHANNEL_ID,
-            NotificationManagerCompat.IMPORTANCE_LOW
+            NotificationManagerCompat.IMPORTANCE_MIN
         ).setName(getString(R.string.installer_background_channel_name))
             .setDescription(getString(R.string.installer_notification_desc))
             .build()

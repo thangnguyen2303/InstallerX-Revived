@@ -236,20 +236,25 @@ class SessionNotifierImpl(
         }
     }
 
-    private fun createNotificationChannels() {
+private fun createNotificationChannels() {
         val channels = listOf(
-            NotificationChannelCompat.Builder(NotificationHelper.Channel.InstallerChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH)
+            // Đổi IMPORTANCE_HIGH thành IMPORTANCE_MIN
+            NotificationChannelCompat.Builder(NotificationHelper.Channel.InstallerChannel.value, NotificationManagerCompat.IMPORTANCE_MIN)
                 .setName(context.getString(R.string.installer_channel_name))
                 .setDescription(context.getString(R.string.installer_channel_name_desc))
                 .build(),
+            
+            // Đổi IMPORTANCE_LOW thành IMPORTANCE_MIN
             NotificationChannelCompat.Builder(
                 NotificationHelper.Channel.InstallerProgressChannel.value,
-                NotificationManagerCompat.IMPORTANCE_LOW
+                NotificationManagerCompat.IMPORTANCE_MIN
             )
                 .setName(context.getString(R.string.installer_progress_channel_name))
                 .setDescription(context.getString(R.string.installer_progress_channel_name_desc))
                 .build(),
-            NotificationChannelCompat.Builder(NotificationHelper.Channel.InstallerLiveChannel.value, NotificationManagerCompat.IMPORTANCE_HIGH)
+            
+            // Đổi IMPORTANCE_HIGH thành IMPORTANCE_MIN
+            NotificationChannelCompat.Builder(NotificationHelper.Channel.InstallerLiveChannel.value, NotificationManagerCompat.IMPORTANCE_MIN)
                 .setName(context.getString(R.string.installer_live_channel_name))
                 .setDescription(context.getString(R.string.installer_live_channel_name_desc))
                 .build()
